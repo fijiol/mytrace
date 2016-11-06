@@ -1,0 +1,3 @@
+Examples:
+	mytrace -c 'perf record -p %pid -o perf.%pid.data &' ./some-script-with-huge-forks
+

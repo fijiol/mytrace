@@ -1,0 +1,42 @@
+#!/bin/bash
+
+print_help() {
+        echo "
+Usage: $0 ... process ...
+        -h        print this help
+	-c <cmd>  start <cmd> on every fork. %pid string will be substituted with actual one.
+	          Example: $0 -c 'echo %pid' bash -c ":"
+"
+        exit 1
+}
+
+if [ 0 -eq $# ]; then
+        print_help
+fi
+
+while true; do
+        case "$1" in
+        -h) print_help; ;;
+	-c) shift; CMD=$1; shift; ;;
+        --) shift; ;;
+        *) break;;
+        esac
+done
+
+MYDIR="$(dirname '$(readlink -f \"$0\")')"
+
+LD_PRELOAD_before=$LD_PRELOAD
+
+export LD_PRELOAD="$MYDIR/mylib.so $LD_PRELOAD"
+export MYTRACE_FORK_CMD=$CMD
+
+#launch user binary
+echo cmd: "$@"
+"$@"
+
+#restore LD_PRELOAD variable
+export LD_PRELOAD=$LD_PRELOAD_before
+
+#should exit with right exit code
+exit $?
+
